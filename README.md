@@ -26,6 +26,24 @@ import request from 'lite-request'
   console.log((await request.get({ url: 'https://myip.hoa-js.com', json: true })).data)
   console.log((await request('https://myip.hoa-js.com', { json: true })).data)
   console.log((await request({ url: 'https://myip.hoa-js.com', json: true })).data)
+
+  // JSON body
+  const jsonRes = await request({
+    method: 'POST',
+    url: 'https://httpbin.org/post',
+    headers: { 'x-custom-header': 'haha' },
+    body: { foo: 'bar' },
+    json: true
+  })
+  console.log(jsonRes.data)
+
+  // x-www-form-urlencoded body
+  const formRes = await request.post('https://httpbin.org/post', {
+    headers: { 'x-custom-header': 'haha' },
+    form: { foo: 'bar' },
+    json: true
+  })
+  console.log(formRes.data)
 })()
 ```
 
