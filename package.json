@@ -1,0 +1,58 @@
+{
+  "name": "lite-request",
+  "description": "A minimal HTTP client for Node.js.",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "types",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "tsup",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepare": "husky"
+  },
+  "author": "nswbmw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nswbmw/lite-request.git"
+  },
+  "keywords": [
+    "request",
+    "http",
+    "https",
+    "get",
+    "post",
+    "fetch",
+    "ajax",
+    "xhr",
+    "req"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "20.1.0",
+    "@commitlint/config-conventional": "20.0.0",
+    "eslint": "9.39.1",
+    "globals": "16.5.0",
+    "husky": "9.1.7",
+    "jest": "30.2.0",
+    "neostandard": "0.12.2",
+    "string-to-stream": "3.0.1",
+    "tsup": "8.5.1"
+  }
+}
