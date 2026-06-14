@@ -2,7 +2,7 @@
 
 A minimal HTTP client for Node.js.
 
-- Only ~150 lines of code, 0 dependencies
+- Only ~150 lines of code
 - Built‑in retry and 3xx redirect following
 - Automatic gzip / deflate / brotli decompression
 - Custom `agent` support (e.g. `SocksProxyAgent`, `HttpsProxyAgent`, etc.)

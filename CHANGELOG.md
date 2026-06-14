@@ -1,3 +1,7 @@
+## v1.1.0 / 2026-06-14
+
+- fix: replace `node:querystring` with `qs-esm` for form encoding
+
 ## v1.0.2 / 2025-11-24
 
 - fix: exports types in package.json

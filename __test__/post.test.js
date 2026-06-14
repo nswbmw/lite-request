@@ -1,5 +1,5 @@
 import http from 'node:http'
-import querystring from 'node:querystring'
+import * as qs from 'qs-esm'
 import str from 'string-to-stream'
 import request from '../index.js'
 
@@ -276,7 +276,7 @@ test('post (form, object)', async () => {
       try {
         const res = await request(opts)
         expect(res.statusCode).toBe(200)
-        expect(querystring.parse(res.data.toString())).toEqual(formData)
+        expect(qs.parse(res.data.toString())).toEqual(formData)
         server.close(resolve)
       } catch (err) {
         server.close(() => reject(err))
@@ -307,6 +307,36 @@ test('post (form, querystring)', async () => {
         const res = await request(opts)
         expect(res.statusCode).toBe(200)
         expect(res.data.toString()).toBe(formData)
+        server.close(resolve)
+      } catch (err) {
+        server.close(() => reject(err))
+      }
+    })
+  })
+})
+
+test('post (form, array)', async () => {
+  const formData = { foo: ['bar', 'baz'] }
+
+  const server = http.createServer((req, res) => {
+    expect(req.method).toBe('POST')
+    expect(req.headers['content-type']).toBe('application/x-www-form-urlencoded')
+    res.statusCode = 200
+    req.pipe(res)
+  })
+
+  await new Promise((resolve, reject) => {
+    server.listen(0, async () => {
+      const port = server.address().port
+      const opts = {
+        method: 'POST',
+        url: 'http://localhost:' + port,
+        form: formData
+      }
+      try {
+        const res = await request(opts)
+        expect(res.statusCode).toBe(200)
+        expect(qs.parse(res.data.toString())).toEqual(formData)
         server.close(resolve)
       } catch (err) {
         server.close(() => reject(err))

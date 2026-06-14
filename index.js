@@ -1,9 +1,10 @@
 import http from 'node:http'
 import https from 'node:https'
-import querystring from 'node:querystring'
 import url from 'node:url'
 import zlib from 'node:zlib'
 import { Writable } from 'node:stream'
+
+import * as qs from 'qs-esm'
 
 const isStream = o => o !== null && typeof o === 'object' && typeof o.pipe === 'function'
 const isFnStream = o => o instanceof Function
@@ -47,7 +48,7 @@ export function Request (defaultOptions = {}) {
       if (options.body) {
         body = options.json && !isFnStream(options.body) && !isStream(options.body) ? JSON.stringify(options.body) : options.body
       } else if (options.form) {
-        body = typeof options.form === 'string' ? options.form : querystring.stringify(options.form)
+        body = typeof options.form === 'string' ? options.form : qs.stringify(options.form)
         options.headers['content-type'] = 'application/x-www-form-urlencoded'
       }
       if (body) {
