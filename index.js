@@ -8,6 +8,7 @@ import * as qs from 'qs-esm'
 
 const isStream = o => o !== null && typeof o === 'object' && typeof o.pipe === 'function'
 const isFnStream = o => o instanceof Function
+const isFormData = o => typeof FormData !== 'undefined' && o instanceof FormData
 function applyDefault (t, d) { for (const a in d) { if (t[a] === undefined) t[a] = d[a] } return t }
 function cloneLowerCase (s) { const n = {}; for (const a in s) { n[a.toLowerCase()] = s[a] } return n }
 
@@ -35,6 +36,14 @@ export function Request (defaultOptions = {}) {
     options.remainingRetry = options.remainingRetry ?? options.maxRetry
     options.remainingRedirects = options.remainingRedirects ?? options.maxRedirects
 
+    if (isFormData(options.body) && !options.multipartBody) { // Serialize FormData once (spec-compliant, via undici), reused on retries/redirects
+      const res = new Response(options.body)
+      return res.arrayBuffer().then(ab => {
+        options.multipartBody = { data: Buffer.from(ab), contentType: res.headers.get('content-type') }
+        return request(options)
+      })
+    }
+
     if (options.url) {
       const { hostname, port, protocol, auth, path } = url.parse(options.url) // eslint-disable-line n/no-deprecated-api
       if (!hostname && !port && !protocol && !auth) options.path = path // Relative path with hostname set
@@ -45,7 +54,10 @@ export function Request (defaultOptions = {}) {
 
     return new Promise((resolve, reject) => {
       let body
-      if (options.body) {
+      if (options.multipartBody) {
+        body = options.multipartBody.data
+        options.headers['content-type'] = options.multipartBody.contentType
+      } else if (options.body) {
         body = options.json && !isFnStream(options.body) && !isStream(options.body) ? JSON.stringify(options.body) : options.body
       } else if (options.form) {
         body = typeof options.form === 'string' ? options.form : qs.stringify(options.form)
@@ -55,7 +67,7 @@ export function Request (defaultOptions = {}) {
         if (isStream(body)) return reject(new Error('opts.body must be a function returning a Readable stream. RTFM'))
         if (!options.method) options.method = 'POST'
         if (!isFnStream(body)) options.headers['content-length'] = Buffer.byteLength(body)
-        if (options.json && !options.form) options.headers['content-type'] = 'application/json'
+        if (options.json && !options.form && !options.multipartBody) options.headers['content-type'] = 'application/json'
       }
       if (options.output && (isStream(options.output) || !isFnStream(options.output))) return reject(new Error('opts.output must be a function returning a Writable stream. RTFM'))
       if (options.json) options.headers.accept = 'application/json'
@@ -121,7 +133,7 @@ export function Request (defaultOptions = {}) {
           }
           if (options.method === 'POST' && [301, 302].includes(res.statusCode)) {
             options.method = 'GET' // On 301/302 redirect, change POST to GET (see #35)
-            delete options.headers['content-length']; delete options.headers['content-type']; delete options.body; delete options.form
+            delete options.headers['content-length']; delete options.headers['content-type']; delete options.body; delete options.form; delete options.multipartBody
           }
           if (options.remainingRedirects-- === 0) {
             requestAbortedOrEnded = false

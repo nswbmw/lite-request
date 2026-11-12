@@ -5,6 +5,7 @@ A minimal HTTP client for Node.js.
 - Only ~150 lines of code
 - Built‑in retry and 3xx redirect following
 - Automatic gzip / deflate / brotli decompression
+- `body` accepts string / Buffer / plain object / `FormData` (serialized as `multipart/form-data` via undici, spec-compliant escaping, serialized once and reused across retries/redirects)
 - Custom `agent` support (e.g. `SocksProxyAgent`, `HttpsProxyAgent`, etc.)
 - Pure Promise API that returns a native Node `IncomingMessage` with `response.data` attached
 
@@ -44,6 +45,16 @@ import request from 'lite-request'
     json: true
   })
   console.log(formRes.data)
+
+  // multipart/form-data body (file upload)
+  const form = new FormData()
+  form.append('input', JSON.stringify({ foo: 'bar' }))
+  form.append('file', new Blob([buffer], { type: 'application/pdf' }), 'receipt.pdf')
+  const multipartRes = await request.post('https://httpbin.org/post', {
+    body: form,
+    json: true
+  })
+  console.log(multipartRes.data)
 })()
 ```
 

@@ -33,6 +33,7 @@ export interface RequestOptions {
    * Request body.
    *
    * - string / Buffer / plain object
+   * - FormData (serialized as multipart/form-data; `content-type` with boundary is set automatically)
    * - function returning a Readable stream (for retryable streaming bodies)
    */
   body?: any
@@ -97,6 +98,8 @@ export interface RequestOptions {
   remainingRedirects?: number
   prevError?: any
   prevStatusCode?: number
+  /** Serialized multipart/form-data body (set automatically when `body` is a FormData). */
+  multipartBody?: { data: Buffer, contentType: string }
 }
 
 export interface RequestFunction {
