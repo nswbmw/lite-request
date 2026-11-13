@@ -268,7 +268,9 @@ test('should destroy and restart INPUT stream on retry', async () => {
       nbDataChunkReceived++
       chunks.push(chunk.toString())
       if (nbDataChunkReceived === 1) {
-        expect(chunk.toString()).toBe('abcde')
+        // The two body chunks may be coalesced into a single TCP segment under load (e.g. CI runners),
+        // so the first chunk received by the server can be any prefix of the full body.
+        expect('abcdefghij'.startsWith(chunk.toString())).toBe(true)
         res.socket.destroy(new Error('ECONNRESET'))
       }
     })
